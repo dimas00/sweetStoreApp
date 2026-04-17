@@ -1,10 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:sweet_store/models/cart_model.dart';
-import 'package:sweet_store/models/product_model.dart';
-import 'package:sweet_store/screens/android/splash/splash_page.dart';
-
+import 'package:http/http.dart';
+import 'package:sweet_store/screens/android/checkout.dart';
+import 'package:sweet_store/screens/android/user_page.dart';
+import 'package:sweet_store/services/cart_service.dart';
+import '../../controller/user_controller.dart';
+import '../../models/product_model.dart';
+import '../../services/auth_service.dart';
+import '../../services/product_service.dart';
+import 'carrinho.dart';
+import 'common/app_alert.dart';
 import 'login.dart';
+import 'order_page.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -15,42 +22,54 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final buscaController = TextEditingController();
+  final userController = UserController();
 
-  List<CartModel> carrinhoList = [
-    CartModel(
-      id: '1',
-      product: ProductModel(
-        name: "bolo",
-        desc: "um bolo",
-        id: '1',
-        image: "",
-        price: 12.0,
-      ),
-      quantity: 1,
-    ),
-    CartModel(
-      id: '1',
-      product: ProductModel(
-        name: "bombom",
-        desc: "um bolo",
-        id: '1',
-        image: "",
-        price: 12.0,
-      ),
-      quantity: 1,
-    ),
-    CartModel(
-      id: '1',
-      product: ProductModel(
-        name: "torta",
-        desc: "um bolo",
-        id: '1',
-        image: "",
-        price: 12.0,
-      ),
-      quantity: 1,
-    ),
-  ];
+
+  List<ProductModel> productList = [];
+
+  bool isLoading = true;
+  @override
+  void initState() {
+    super.initState();
+    carregarDados();
+  }
+
+  void finalizarCompra() async {
+    if (CartService.isEmpty()) {
+      AppAlert.showInfo(context, "Adicione algo no carrinho!");
+      return;
+    }
+
+    final ok = await userController.exigirLogin(context);
+
+    if (!ok) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => CheckoutPage()),
+      );
+    });
+  }
+
+  Future<void> carregarDados() async {
+    try {
+      final products = await ProductService.getProducts();
+
+      setState(() {
+        productList = products;
+        print("SETANDO LISTA: ${products.length}");
+        isLoading = false;
+      });
+      print(products);
+      print(products.length);
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+
+      print(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,16 +78,19 @@ class _HomeState extends State<Home> {
         FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(180),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 80, left: 16, right: 16),
+        appBar: AppBar(
+          backgroundColor: Colors.deepPurple,
+          toolbarHeight: 100,
+          title: Padding(
+            padding: const EdgeInsets.only(top: 20),
             child: Row(
               children: [
                 Expanded(
                   child: TextFormField(
                     controller: buscaController,
                     decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
                       prefixIcon: Icon(Icons.search),
                       labelText: "Pesquisa",
                       contentPadding: EdgeInsets.zero,
@@ -78,94 +100,226 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                 ),
-                IconButton(onPressed: () {}, icon: Icon(Icons.shopping_cart)),
-                IconButton(onPressed: () {}, icon: Icon(Icons.person)),
+                ValueListenableBuilder(
+                  valueListenable: CartService.cart,
+                  builder: (context, cart, child) {
+                    final totalItems = CartService.getTotalItems();
+
+                    return Stack(
+                      children: [
+                        IconButton(
+                          onPressed: cart.isEmpty
+                              ? null
+                              : () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => Carrinho(),
+                                    ),
+                                  );
+                                },
+                          icon: Icon(Icons.shopping_cart),
+                        ),
+
+                        // 🔴 BADGE
+                        if (totalItems > 0)
+                          Positioned(
+                            right: 6,
+                            top: 6,
+                            child: Container(
+                              padding: EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              constraints: BoxConstraints(
+                                minWidth: 18,
+                                minHeight: 18,
+                              ),
+                              child: Text(
+                                '$totalItems',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => OrderPage()),
+                    );
+                  },
+                  icon: Icon(Icons.receipt),
+                ),
+
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => UserPage()),
+                    );
+                  },
+                  icon: Icon(Icons.person),
+                ),
               ],
             ),
           ),
         ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [Text("status da loja")],
-              ),
-            ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
+        body: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Column(
                 children: [
-                  TextButton(onPressed: () {}, child: Text("Bolo de pote")),
-                  TextButton(onPressed: () {}, child: Text("Bombom")),
-                  TextButton(onPressed: () {}, child: Text("Tortas")),
-                  TextButton(onPressed: () {}, child: Text("Tortas")),
-                ],
-              ),
-            ),
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  for (CartModel carrinho in carrinhoList)
-                    Card(
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 200.0,
-                            margin: const EdgeInsets.all(30),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black),
-                            ),
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  carrinho.product.name,
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                Text(carrinho.product.desc),
-                                SizedBox(height: 10),
-                                Text('R\$${carrinho.product.price}'),
-                              ],
-                            ),
-                          ),
-                          Column(
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [Text("status da loja")],
+                    ),
+                  ),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        TextButton(
+                          onPressed: () {},
+                          child: Text("Bolo de pote "),
+                        ),
+                        TextButton(onPressed: () {}, child: Text("Bombom")),
+                        TextButton(onPressed: () {}, child: Text("Pave")),
+                        TextButton(onPressed: () {}, child: Text("Tortas")),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: productList.length,
+                      itemBuilder: (context, index) {
+                        final product = productList[index];
+                        return Card(
+                          child: Row(
                             children: [
-                              FlutterLogo(size: 80),
-                              Row(
-                                children: [
-                                  IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(Icons.remove_circle_outline),
+                              Expanded(
+                                child: Container(
+                                  margin: const EdgeInsets.all(30),
+                                  decoration: BoxDecoration(
+                                    // border: Border.all(color: Colors.black),
+                                    borderRadius: BorderRadius.circular(8.0),
                                   ),
-                                  Text("${carrinho.quantity}"),
-                                  IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(Icons.add_circle_outline),
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        product.nome,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(product.descricao),
+                                      SizedBox(height: 10),
+                                      Text('R\$${product.preco}'),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Column(
+                                children: [
+                                  Image.network(
+                                    product.imagemUrl.isNotEmpty
+                                        ? "http://192.168.1.7:8080/produto/imagem/" +
+                                              product.imagemUrl
+                                        : "https://via.placeholder.com/150",
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(Icons.image_not_supported);
+                                    },
+                                  ),
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          CartService.remove(product);
+                                        },
+                                        icon: Icon(Icons.remove_circle_outline),
+                                      ),
+                                      ValueListenableBuilder(
+                                        valueListenable: CartService.cart,
+                                        builder: (context, cart, child) {
+                                          return Text(
+                                            "${CartService.getQuantidade(product)}",
+                                          );
+                                        },
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          CartService.add(product);
+                                        },
+                                        icon: Icon(Icons.add_circle_outline),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
                             ],
                           ),
+                        );
+                      },
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(0, 10, 0, 00),
+                    height: 70,
+                    decoration: BoxDecoration(
+                      color: Colors.deepPurple,
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ValueListenableBuilder(
+                            valueListenable: CartService.cart,
+                            builder: (context, cart, child) {
+                              return Text(
+                                'Total: R\$${CartService.getTotal().toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              );
+                            },
+                          ),
+
+                          ValueListenableBuilder(
+                            valueListenable: CartService.cart,
+                            builder: (context, cart, child) {
+                              return ElevatedButton(
+                                onPressed: cart.isEmpty
+                                    ? null
+                                    : finalizarCompra,
+                                child: Text("Finalizar"),
+                              );
+                            },
+                          ),
                         ],
                       ),
-                    ),
-                  Container(
-                    child: Row(
-                      children: [
-                        Text(
-                          'Total: R\$${carrinhoList.map((value) => value.quantity.toDouble() * value.product.price).fold(0.0, (prev, element) => prev + element)}',
-                        ),
-                      ],
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

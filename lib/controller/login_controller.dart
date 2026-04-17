@@ -1,21 +1,32 @@
-
 import 'package:flutter/cupertino.dart';
 
-class LoginController{
+class LoginController {
+  ValueNotifier<bool> isLoading = ValueNotifier<bool>(false);
 
-  ValueNotifier<bool> inLoader = ValueNotifier<bool>(false);
-
-  String? _login;
-  setLogin(String value)=> _login = value;
-  String? _senha;
-  setSenha(String value)=> _senha = value;
+  String _login = '';
+  String _senha = '';
 
 
-  Future<bool> auth() async{
-    inLoader.value = true;
+  void setLogin(String value) => _login = value;
+  void setSenha(String value) => _senha = value;
+
+
+  String get login => _login;
+  String get senha => _senha;
+
+  Future<String?> auth() async {
+    isLoading.value = true;
+
     await Future.delayed(Duration(seconds: 2));
-    inLoader.value = false;
-    return _login == 'admin' && _senha == '123';
 
-}
+    isLoading.value = false;
+
+    // simulação de sucesso
+    if (_login == 'admin' && _senha == '123') {
+      return "token_fake_123";
+    }
+
+    // falha
+    return null;
+  }
 }
