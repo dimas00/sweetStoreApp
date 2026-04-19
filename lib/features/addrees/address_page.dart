@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../services/address_service.dart';
-import '../../widgets/buildFooter.dart';
+import 'address_service.dart';
 
 class EnderecoPage extends StatefulWidget {
   const EnderecoPage({Key? key}) : super(key: key);

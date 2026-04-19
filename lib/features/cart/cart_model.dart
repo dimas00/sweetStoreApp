@@ -1,6 +1,6 @@
 
 
-import 'package:sweet_store/models/product_model.dart';
+import 'package:sweet_store/features/product/product_model.dart';
 
 class CartModel {
   final String id;

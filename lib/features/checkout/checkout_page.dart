@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:sweet_store/screens/android/common/app_alert.dart';
+import 'package:sweet_store/core/utils/app_alert.dart';
 
-import '../../services/address_service.dart';
-import '../../services/cart_service.dart';
-import '../../widgets/buildFooter.dart';
-import 'address.dart';
+import '../../shered/widgets/buildFooter.dart';
+import '../addrees/address_page.dart';
+import '../addrees/address_service.dart';
+import '../cart/cart_service.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({Key? key}) : super(key: key);

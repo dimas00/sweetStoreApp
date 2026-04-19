@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 
-import '../../controller/login_controller.dart';
-import '../../services/auth_service.dart';
-import 'common/app_alert.dart';
+import 'login_controller.dart';
+import 'auth_service.dart';
+import '../../core/utils/app_alert.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
 
   @override
   State<Login> createState() => _LoginState();
-
 }
 
 class _LoginState extends State<Login> {
   final LoginController _controller = LoginController();
-  AuthService  authService = AuthService();
+  AuthService authService = AuthService();
   bool isLoading = false;
 
   final emailController = TextEditingController();
@@ -45,22 +44,13 @@ class _LoginState extends State<Login> {
     }
 
     setState(() {
-
       isLoading = false;
-
     });
-
-
   }
 
   void mostrarErro(String msg) {
-    AppAlert.showError(
-      context,
-      msg,
-    );
+    AppAlert.showError(context, msg);
   }
-
-
 
   @override
   Widget build(BuildContext context) {

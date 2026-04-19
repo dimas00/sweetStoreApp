@@ -1,17 +1,14 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
-import 'package:sweet_store/screens/android/checkout.dart';
-import 'package:sweet_store/screens/android/user_page.dart';
-import 'package:sweet_store/services/cart_service.dart';
-import '../../controller/user_controller.dart';
-import '../../models/product_model.dart';
-import '../../services/auth_service.dart';
-import '../../services/product_service.dart';
-import 'carrinho.dart';
-import 'common/app_alert.dart';
-import 'login.dart';
-import 'order_page.dart';
+import 'package:sweet_store/features/cart/cart_service.dart';
+import 'package:sweet_store/features/checkout/checkout_page.dart';
+
+import '../../core/utils/app_alert.dart';
+import '../cart/cart_page.dart';
+import '../checkout/order_page.dart';
+import '../product/product_model.dart';
+import '../product/product_service.dart';
+import '../user/user_controller.dart';
+import '../user/user_page.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);

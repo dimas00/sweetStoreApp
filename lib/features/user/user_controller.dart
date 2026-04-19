@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../screens/android/login.dart';
-import '../services/user_service.dart';
+import '../auth/login_page.dart';
+import 'user_service.dart';
 
 class UserController {
 

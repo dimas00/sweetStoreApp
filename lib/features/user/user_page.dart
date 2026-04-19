@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sweet_store/screens/android/common/app_alert.dart';
-import '../../app_state.dart';
-import '../../controller/user_controller.dart';
-import '../../services/auth_service.dart';
-import 'login.dart';
+import 'package:sweet_store/core/utils/app_alert.dart';
+import '../../core/state/app_state.dart';
+import '../auth/auth_service.dart';
 
 class UserPage extends StatefulWidget {
   const UserPage({super.key});
@@ -62,6 +60,10 @@ class _UserPageState extends State<UserPage> {
 
         if (result == true) {
           carregar(); // 🔥 tenta de novo depois do login
+        }else{
+          setState(() {
+            loading=false;
+          });
         }
 
         return;

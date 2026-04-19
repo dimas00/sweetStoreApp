@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/cart_model.dart';
-import '../models/product_model.dart';
+import 'cart_model.dart';
+import '../product/product_model.dart';
 
 class CartService {
   static final ValueNotifier<List<CartModel>> cart = ValueNotifier([]);

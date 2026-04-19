@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sweet_store/services/cart_service.dart';
+import 'package:sweet_store/features/cart/cart_service.dart';
 
 class Carrinho extends StatefulWidget {
   const Carrinho({Key? key}) : super(key: key);

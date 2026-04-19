@@ -1,8 +1,10 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../screens/android/config/api_config.dart';
-import 'session_manager.dart';
+
+import '../../features/auth/session_manager.dart';
+import '../config/api_config.dart';
 
 class ApiClient {
 

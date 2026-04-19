@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sweet_store/screens/android/config/api_config.dart';
-import 'package:sweet_store/services/api_client.dart';
+
+import '../../core/config/api_config.dart';
+
+
 
 class AuthService {
   static String? token;

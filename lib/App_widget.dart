@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:sweet_store/screens/android/carrinho.dart';
-import 'package:sweet_store/screens/android/home.dart';
-import 'package:sweet_store/services/session_manager.dart';
+import 'package:sweet_store/features/cart/cart_page.dart';
+import 'package:sweet_store/features/home/home_page.dart';
+import 'package:sweet_store/features/auth/session_manager.dart';
 
-import 'screens/android/login.dart';
-import 'screens/android/splash_page.dart';
+import 'features/auth/login_page.dart';
+import 'core/splash_page.dart';
 
 class AppWidget extends StatefulWidget {
   const AppWidget({super.key});

@@ -1,5 +1,4 @@
 import 'dart:ffi';
-
 class Usuario{
   final Long? id_usuario;
   final String nome;

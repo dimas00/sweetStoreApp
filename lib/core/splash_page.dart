@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../app_state.dart';
-import '../../services/auth_service.dart';
-import 'common/constants/app_colors.dart';
-import 'login.dart';
+import '../features/auth/auth_service.dart';
+import '../features/auth/login_page.dart';
+import '../shered/constants/app_colors.dart';
+import 'state/app_state.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);

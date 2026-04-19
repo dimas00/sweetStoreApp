@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:sweet_store/screens/android/config/api_config.dart';
 
-import '../models/product_model.dart';
+import 'package:http/http.dart' as http;
+
+import '../../core/config/api_config.dart';
+import 'product_model.dart';
 
 class ProductService {
   static const String baseUrl = ApiConfig.baseUrl;
