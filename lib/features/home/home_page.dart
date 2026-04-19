@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:sweet_store/features/cart/cart_service.dart';
 import 'package:sweet_store/features/checkout/checkout_page.dart';
 
+import '../../core/navigation/app_navigator.dart';
 import '../../core/utils/app_alert.dart';
 import '../cart/cart_page.dart';
-import '../checkout/order_page.dart';
+import '../order/order_page.dart';
 import '../product/product_model.dart';
 import '../product/product_service.dart';
 import '../user/user_controller.dart';
@@ -22,6 +23,7 @@ class _HomeState extends State<Home> {
   final userController = UserController();
 
 
+
   List<ProductModel> productList = [];
 
   bool isLoading = true;
@@ -32,20 +34,14 @@ class _HomeState extends State<Home> {
   }
 
   void finalizarCompra() async {
+
     if (CartService.isEmpty()) {
       AppAlert.showInfo(context, "Adicione algo no carrinho!");
       return;
     }
 
-    final ok = await userController.exigirLogin(context);
+    AppNavigator.push(context, '/checkout');
 
-    if (!ok) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => CheckoutPage()),
-      );
-    });
   }
 
   Future<void> carregarDados() async {
@@ -159,10 +155,8 @@ class _HomeState extends State<Home> {
 
                 IconButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => UserPage()),
-                    );
+                    AppNavigator.push(context, '/user');
+
                   },
                   icon: Icon(Icons.person),
                 ),

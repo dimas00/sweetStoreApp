@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../auth/auth_service.dart';
 import '../auth/login_page.dart';
 import 'user_service.dart';
 
@@ -8,11 +9,29 @@ class UserController {
 
   Map<String, dynamic>? usuario;
 
-  final service = UserService();
+  final userService = UserService();
+  final authService = AuthService();
+
+
+  Future<bool> login(String email, String senha) async {
+    try {
+      final token = await authService.login(email, senha);
+
+      if (token == null) return false;
+
+      // 🔥 importante: depois do login, carrega usuário
+      usuario = await userService.getUsuario();
+
+      return usuario != null;
+
+    } catch (e) {
+      return false;
+    }
+  }
 
   Future<Map<String, dynamic>?> carregarUsuario() async {
     try {
-      final data = await service.getUsuario();
+      final data = await userService.getUsuario();
 
       // 🔥 salva no estado global
       usuario = data;
@@ -50,7 +69,7 @@ class UserController {
   }
 
   Future<bool> atualizar(String nome, String email) async {
-    final ok = await service.atualizarUsuario(nome, email);
+    final ok = await userService.atualizarUsuario(nome, email);
 
     if (ok) {
       // atualiza local sem precisar bater na API de novo

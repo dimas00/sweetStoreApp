@@ -4,27 +4,33 @@ import 'package:sweet_store/core/navigation/route_guard.dart';
 import '../state/app_state.dart';
 
 class AppNavigator {
-
   static Future<void> push(BuildContext context, String route) async {
-
     final controller = AppState.userController;
 
-    // 🔒 verifica se rota precisa de login
+    // 🔒 rota protegida
     if (RouteGuard.rotasProtegidas.contains(route)) {
 
-      final user = controller.usuario ?? await controller.carregarUsuario();
+      // 🔁 tenta carregar usuário (caso não esteja em memória)
+      if (controller.usuario == null) {
+        await controller.carregarUsuario();
+      }
 
-      if (user == null) {
-
+      // ❌ ainda não tem usuário → BLOQUEIA
+      if (controller.usuario == null) {
         final result = await Navigator.pushNamed(context, '/login');
 
         // ❌ usuário desistiu
         if (result != true) return;
 
+        // 🔁 tenta novamente depois do login
+        await controller.carregarUsuario();
+
+        // ❌ ainda falhou → cancela
+        if (controller.usuario == null) return;
       }
     }
 
-    // ✅ navegação normal
+    // ✅ só chega aqui se tiver usuário
     Navigator.pushNamed(context, route);
   }
 }

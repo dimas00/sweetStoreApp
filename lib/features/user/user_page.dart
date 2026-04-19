@@ -49,26 +49,12 @@ class _UserPageState extends State<UserPage> {
 
   void carregar() async {
     try {
-      final user = await controller.carregarUsuario();
+      // 🔥 chama controller (que já usa cache/global)
+      await controller.carregarUsuario();
 
-      if (!mounted) return;
+      final user = controller.usuario!;
 
-      if (user == null) {
-        AppAlert.showInfo(context, "Faça login para continuar");
-
-        final result = await Navigator.pushNamed(context, '/login');
-
-        if (result == true) {
-          carregar(); // 🔥 tenta de novo depois do login
-        }else{
-          setState(() {
-            loading=false;
-          });
-        }
-
-        return;
-      }
-
+      // ✅ preenche os campos
       nomeController.text = user["nome"] ?? "";
       emailController.text = user["email"] ?? "";
       telefoneController.text = user["telefone"] ?? "";
@@ -78,8 +64,9 @@ class _UserPageState extends State<UserPage> {
 
     } catch (e) {
       if (!mounted) return;
-
+      print("Erro: $e");
       AppAlert.showInfo(context, "Erro ao carregar usuário");
+      setState(() => loading = false);
     }
   }
 
@@ -127,7 +114,13 @@ class _UserPageState extends State<UserPage> {
 
   void logout() {
     AuthService.logout();
-    Navigator.pushReplacementNamed(context, "/home");
+    controller.usuario = null; // 🔥 limpa estado global
+
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      "/home",
+          (route) => false,
+    );
   }
 
   Widget buildSection({required String title, required Widget child}) {
@@ -266,48 +259,6 @@ class _UserPageState extends State<UserPage> {
     );
   }
 
-  Widget buildPedidos() {
-    final pedidos = controller.usuario?["pedidos"] ?? [];
-
-    return buildSection(
-      title: "Pedidos",
-      child: Column(
-        children: [
-          if (pedidos.isEmpty) Text("Nenhum pedido realizado"),
-
-          ...pedidos.map<Widget>((p) {
-            return Container(
-              margin: EdgeInsets.only(bottom: 10),
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Pedido #${p["id"]}"),
-                      Text("R\$ ${p["total"]}"),
-                    ],
-                  ),
-
-                  ElevatedButton(
-                    onPressed: () {
-                      // abrir detalhe
-                    },
-                    child: Text("Detalhes"),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -322,7 +273,7 @@ class _UserPageState extends State<UserPage> {
       ),
       body: ListView(
         padding: EdgeInsets.all(16),
-        children: [buildUsuario(), buildEnderecos(), buildPedidos()],
+        children: [buildUsuario(), buildEnderecos()],
       ),
     );
   }

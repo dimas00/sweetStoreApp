@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:sweet_store/features/cart/cart_page.dart';
 import 'package:sweet_store/features/home/home_page.dart';
 import 'package:sweet_store/features/auth/session_manager.dart';
+import 'package:sweet_store/features/user/user_page.dart';
 
 import 'features/auth/login_page.dart';
 import 'core/splash_page.dart';
+import 'features/checkout/checkout_page.dart';
 
 class AppWidget extends StatefulWidget {
   const AppWidget({super.key});
@@ -38,7 +40,7 @@ class _AppWidgetState extends State<AppWidget> {
         ),
       ),
       navigatorKey: navigatorKey,
-      routes: {'/login': (_) => Login(), '/home': (_) => Home()},
+      routes: {'/login': (_) => Login(), '/home': (_) => Home(), '/cart': (_) => Carrinho(), '/user': (_) => UserPage(), '/checkout': (_) => CheckoutPage(), },
       home: Home(),
     );
   }

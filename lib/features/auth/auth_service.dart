@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/config/api_config.dart';
+import '../../core/network/api_client.dart';
 
 
 
@@ -10,37 +11,36 @@ class AuthService {
   static String? token;
 
   final String baseUrl = ApiConfig.baseUrl;
+  final api = ApiClient();
+
 
 
   Future<String?> login(String email, String senha) async {
     try {
-      final response = await http.post(
-        Uri.parse("$baseUrl/login"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
+      final response = await api.post(
+        "/login",
+        {
           "email": email,
           "senha": senha,
-        }),
+        },
+        auth: false, // 🔥 SEM TOKEN
       );
-
-      print('STATUS: ${response.statusCode}');
-      print('BODY: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        token = data["token"];
+        final token = data["token"];
 
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("token", token!);
+        await prefs.setString("token", token);
 
         return token;
-      } else {
-        print("Erro backend: ${response.body}");
-        return null;
       }
+
+      return null;
+
     } catch (e) {
-      print("Erro REAL: $e");
+      print("Erro login: $e");
       return null;
     }
   }

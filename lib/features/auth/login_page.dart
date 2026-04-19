@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'login_controller.dart';
+import '../../core/state/app_state.dart';
 import 'auth_service.dart';
 import '../../core/utils/app_alert.dart';
 
@@ -12,7 +12,6 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  final LoginController _controller = LoginController();
   AuthService authService = AuthService();
   bool isLoading = false;
 
@@ -20,32 +19,24 @@ class _LoginState extends State<Login> {
   final senhaController = TextEditingController();
 
   void fazerLogin() async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
-    try {
-      final token = await authService.login(
-        emailController.text,
-        senhaController.text,
-      );
+    final controller = AppState.userController;
 
-      if (token != null) {
-        // sucesso → vai pra home
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pop(context, true);
-        });
-      } else {
-        mostrarErro("Login inválido");
-      }
-    } catch (e) {
-      mostrarErro("Erro ao conectar com servidor");
-      print(e);
+    final sucesso = await controller.login(
+      emailController.text,
+      senhaController.text,
+    );
+
+    if (!mounted) return;
+
+    if (sucesso) {
+      Navigator.pop(context, true); // 🔥 volta pro guard
+    } else {
+      mostrarErro("Login inválido");
     }
 
-    setState(() {
-      isLoading = false;
-    });
+    setState(() => isLoading = false);
   }
 
   void mostrarErro(String msg) {

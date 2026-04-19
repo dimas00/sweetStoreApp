@@ -8,13 +8,13 @@ import '../config/api_config.dart';
 
 class ApiClient {
 
-  Future<Map<String, String>> _getHeaders() async {
+  Future<Map<String, String>> _getHeaders({bool auth = true}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
     return {
       "Content-Type": "application/json",
-      if (token != null) "Authorization": "Bearer $token",
+      if (auth && token != null) "Authorization": "Bearer $token",
     };
   }
 
@@ -30,17 +30,14 @@ class ApiClient {
     return response;
   }
 
-  Future<http.Response> post(String endpoint, Map body) async {
-    final headers = await _getHeaders();
+  Future<http.Response> post(String endpoint, Map body, {bool auth = true}) async {
+    final headers = await _getHeaders(auth: auth);
 
-    final response = await http.post(
+    return http.post(
       Uri.parse("${ApiConfig.baseUrl}$endpoint"),
       headers: headers,
       body: jsonEncode(body),
     );
-
-    _handleAuthError(response);
-    return response;
   }
 
   Future<http.Response> put(String endpoint, Map body) async {
