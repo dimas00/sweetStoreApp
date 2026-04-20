@@ -6,6 +6,7 @@ class UserService {
   final api = ApiClient();
 
   // 🔍 busca usuário logado
+  // 🔍 busca usuário logado
   Future<Map<String, dynamic>?> getUsuario() async {
     try {
       final response = await api.get("/usuario/me");
@@ -14,10 +15,15 @@ class UserService {
       print("GET USER BODY: ${response.body}");
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        final jsonResponse = jsonDecode(response.body);
+
+        // 🔥 Verifica se o campo 'data' existe e o retorna diretamente
+        if (jsonResponse["data"] != null) {
+          return jsonResponse["data"];
+        }
       }
 
-      // ❗ se não for 200 → considera não logado
+      // ❗ se não for 200 ou não vier dados → considera não logado
       return null;
 
     } catch (e) {

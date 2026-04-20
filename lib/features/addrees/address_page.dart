@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'address_service.dart';
 
-class EnderecoPage extends StatefulWidget {
-  const EnderecoPage({Key? key}) : super(key: key);
+class AddreesPage extends StatefulWidget {
+  const AddreesPage({Key? key}) : super(key: key);
 
   @override
-  State<EnderecoPage> createState() => _EnderecoPageState();
+  State<AddreesPage> createState() => _AddreesPageState();
 }
 
-class _EnderecoPageState extends State<EnderecoPage> {
+class _AddreesPageState extends State<AddreesPage> {
   Widget buildInput(TextEditingController controller, String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),

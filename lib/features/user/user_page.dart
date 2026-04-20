@@ -199,7 +199,7 @@ class _UserPageState extends State<UserPage> {
                 Text("Nenhum endereço cadastrado"),
                 TextButton(
                   onPressed: () {
-                    // ir para cadastro
+                    Navigator.pushNamed(context, '/addrees');
                   },
                   child: Text("Cadastrar endereço"),
                 ),

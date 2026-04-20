@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:sweet_store/core/navigation/route_guard.dart';
 
 import '../state/app_state.dart';
+import '../utils/app_alert.dart';
 
 class AppNavigator {
   static Future<void> push(BuildContext context, String route) async {
@@ -17,6 +18,8 @@ class AppNavigator {
 
       // ❌ ainda não tem usuário → BLOQUEIA
       if (controller.usuario == null) {
+        AppAlert.showInfo(context, "Faça login para continuar!");
+
         final result = await Navigator.pushNamed(context, '/login');
 
         // ❌ usuário desistiu

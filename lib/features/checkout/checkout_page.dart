@@ -218,7 +218,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => EnderecoPage(),
+                      builder: (_) => AddreesPage(),
                     ),
                   );
                 },
@@ -239,7 +239,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => EnderecoPage(),
+                    builder: (_) => AddreesPage(),
                   ),
                 );
               },

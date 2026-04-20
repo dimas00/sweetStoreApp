@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sweet_store/features/addrees/address_page.dart';
 import 'package:sweet_store/features/cart/cart_page.dart';
 import 'package:sweet_store/features/home/home_page.dart';
 import 'package:sweet_store/features/auth/session_manager.dart';
@@ -40,7 +41,7 @@ class _AppWidgetState extends State<AppWidget> {
         ),
       ),
       navigatorKey: navigatorKey,
-      routes: {'/login': (_) => Login(), '/home': (_) => Home(), '/cart': (_) => Carrinho(), '/user': (_) => UserPage(), '/checkout': (_) => CheckoutPage(), },
+      routes: {'/login': (_) => Login(), '/home': (_) => Home(), '/cart': (_) => Carrinho(), '/user': (_) => UserPage(), '/checkout': (_) => CheckoutPage(), '/addrees': (_) => AddreesPage() },
       home: Home(),
     );
   }

@@ -27,37 +27,29 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final jsonResponse = jsonDecode(response.body);
 
-        final token = data["token"];
+        // 🔍 Verifica se a chave 'data' existe (do seu ApiResponseDto do Java)
+        if (jsonResponse["data"] != null) {
+          // Acessa o token que está DENTRO do objeto 'data'
+          final tokenDaApi = jsonResponse["data"]["token"];
 
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("token", token);
-
-        return token;
+          // Se o token realmente existir, salva no SharedPreferences
+          if (tokenDaApi != null) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString("token", tokenDaApi);
+            return tokenDaApi;
+          }
+        }
+        return null; // Retorna nulo se não achou o token
       }
 
-      return null;
+      return null; // Retorna nulo se o status não for 200
 
     } catch (e) {
       print("Erro login: $e");
       return null;
     }
-  }
-
-  Future<void> salvarToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("token", token);
-  }
-
-  Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString("token");
-  }
-
-  Future<bool> isLogged() async {
-    final token = await getToken();
-    return token != null;
   }
 
 
