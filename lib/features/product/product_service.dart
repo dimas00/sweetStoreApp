@@ -6,7 +6,7 @@ import '../../core/config/api_config.dart';
 import 'product_model.dart';
 
 class ProductService {
-  static const String baseUrl = ApiConfig.baseUrl;
+  static String baseUrl = ApiConfig.baseUrl;
 
   static Future<List<ProductModel>> getProducts() async {
     final response = await http.get(

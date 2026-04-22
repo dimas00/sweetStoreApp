@@ -1,3 +1,6 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class ApiConfig {
-  static const String baseUrl = "http://192.168.1.2:8080/SweetStore";
-}
+  // Pega a URL do .env. Se não achar, usa um fallback de segurança
+  static String get baseUrl => dotenv.env['API_BASE_URL'] ?? "http://192.168.1.246:8080/SweetStore";
+  }

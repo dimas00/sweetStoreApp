@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sweet_store/core/utils/app_alert.dart';
 import '../../core/state/app_state.dart';
 import '../auth/auth_service.dart';
+import 'edit_user_page.dart';
 
 class UserPage extends StatefulWidget {
   const UserPage({super.key});
@@ -148,39 +149,16 @@ class _UserPageState extends State<UserPage> {
   Widget buildUsuario() {
     return buildSection(
       title: "Informações do Usuário",
+      // 👈 O botão de editar igual ao dos endereços
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(
-            controller: nomeController,
-            decoration: InputDecoration(labelText: "Nome", errorText: erroNome),
-          ),
-
-          SizedBox(height: 10),
-
-          TextField(
-            controller: emailController,
-            decoration: InputDecoration(
-              labelText: "Email",
-              errorText: erroEmail,
-            ),
-          ),
-
-          TextField(
-            controller: telefoneController,
-            decoration: InputDecoration(labelText: "Telefone"),
-          ),
-          SizedBox(height: 10),
-
-          TextField(
-            controller: cpfController,
-            decoration: InputDecoration(labelText: "CPF"),
-          ),
-          SizedBox(height: 15),
-
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(onPressed: salvar, child: Text("Salvar")),
-          ),
+          // Aqui você pode usar Text ou ListTiles em vez de TextFields para visualização
+          Text("Nome: ${nomeController.text}", style: const TextStyle(fontSize: 15)),
+          const SizedBox(height: 5),
+          Text("Email: ${emailController.text}", style: const TextStyle(fontSize: 15)),
+          const SizedBox(height: 5),
+          Text("Telefone: ${telefoneController.text}", style: const TextStyle(fontSize: 15)),
         ],
       ),
     );
