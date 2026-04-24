@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/config/api_config.dart';
@@ -18,7 +17,7 @@ class AuthService {
   Future<String?> login(String email, String senha) async {
     try {
       final response = await api.post(
-        "/login",
+        "/auth",
         {
           "email": email,
           "senha": senha,
@@ -52,6 +51,41 @@ class AuthService {
     }
   }
 
+  Future<bool> register(String nome, String email, String telefone, String cpf, String senha) async {
+    try {
+      final response = await api.post(
+        "/auth/register",
+        {
+          "nome": nome,
+          "email": email,
+          "telefone": telefone,
+          "cpf": cpf,
+          "senha": senha,
+        },
+        auth: false, // Sem token, pois está criando a conta
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+
+        // 🔍 Verifica se a chave 'data' existe e contém o token
+        if (jsonResponse["data"] != null) {
+          final tokenDaApi = jsonResponse["data"]["token"];
+
+          if (tokenDaApi != null) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString("token", tokenDaApi);
+            return true; // Sucesso e logado!
+          }
+        }
+      }
+      print(response);
+      return false; // Falha no cadastro
+    } catch (e) {
+      print("Erro de conexão ao cadastrar: $e");
+      return false;
+    }
+  }
 
 
   static void logout() async {
@@ -59,4 +93,5 @@ class AuthService {
     await prefs.remove("token");
 
   }
+
 }

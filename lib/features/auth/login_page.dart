@@ -83,6 +83,7 @@ class _LoginState extends State<Login> {
 
             SizedBox(height: 30),
 
+            // Botão Principal de Login
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -91,6 +92,27 @@ class _LoginState extends State<Login> {
                 child: isLoading
                     ? CircularProgressIndicator(color: Colors.white)
                     : Text("Entrar"),
+              ),
+            ),
+
+            SizedBox(height: 15), // Espaçamento entre os botões
+            // Botão / Link de Criar Conta
+            TextButton(
+              onPressed: () {
+                // Aqui você coloca a navegação para a sua página de criação de conta
+                // Exemplo usando rotas nomeadas:
+                Navigator.pushNamed(context, '/register');
+
+                // Ou usando MaterialPageRoute se não usar rotas nomeadas:
+                // Navigator.push(context, MaterialPageRoute(builder: (context) => CadastroPage()));
+              },
+              child: const Text(
+                "Não tem uma conta? Cadastre-se",
+                style: TextStyle(
+                  color: Colors.deepPurple, // Cor que combina com seu AppBar
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
           ],
