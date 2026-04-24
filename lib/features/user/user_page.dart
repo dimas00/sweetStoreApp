@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sweet_store/core/utils/app_alert.dart';
+import '../../core/network/api_exception.dart';
 import '../../core/state/app_state.dart';
 import '../auth/auth_service.dart';
 import 'edit_user_page.dart';
@@ -50,24 +51,22 @@ class _UserPageState extends State<UserPage> {
 
   void carregar() async {
     try {
-      // 🔥 chama controller (que já usa cache/global)
-      await controller.carregarUsuario();
+      final user = await controller.carregarUsuario();
 
-      final user = controller.usuario!;
+      if (!mounted) return;
 
-      // ✅ preenche os campos
+      if (user == null) {
+        Navigator.pushReplacementNamed(context, '/login');
+        return;
+      }
+
       nomeController.text = user["nome"] ?? "";
       emailController.text = user["email"] ?? "";
-      telefoneController.text = user["telefone"] ?? "";
-      cpfController.text = user["cpf"] ?? "";
 
       setState(() => loading = false);
 
-    } catch (e) {
-      if (!mounted) return;
-      print("Erro: $e");
-      AppAlert.showInfo(context, "Erro ao carregar usuário");
-      setState(() => loading = false);
+    } on ApiException catch (e) {
+      AppAlert.showInfo(context, e.message);
     }
   }
 

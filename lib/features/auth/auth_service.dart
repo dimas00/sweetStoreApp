@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/config/api_config.dart';
 import '../../core/network/api_client.dart';
+import '../../core/network/api_exception.dart';
 
 
 
@@ -16,82 +17,72 @@ class AuthService {
 
   Future<String?> login(String email, String senha) async {
     try {
-      final response = await api.post(
+      final data = await ApiClient().post(
         "/auth",
         {
           "email": email,
           "senha": senha,
         },
-        auth: false, // 🔥 SEM TOKEN
+        auth: false, // 🔥 login não usa token
       );
 
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
+      final token = data["data"]?["token"];
 
-        // 🔍 Verifica se a chave 'data' existe (do seu ApiResponseDto do Java)
-        if (jsonResponse["data"] != null) {
-          // Acessa o token que está DENTRO do objeto 'data'
-          final tokenDaApi = jsonResponse["data"]["token"];
-
-          // Se o token realmente existir, salva no SharedPreferences
-          if (tokenDaApi != null) {
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setString("token", tokenDaApi);
-            return tokenDaApi;
-          }
-        }
-        return null; // Retorna nulo se não achou o token
+      if (token != null) {
+        await salvarToken(token);
+        return token;
       }
 
-      return null; // Retorna nulo se o status não for 200
+      throw ApiException("Token não retornado", 500);
 
-    } catch (e) {
-      print("Erro login: $e");
-      return null;
+    } on ApiException {
+      rethrow; // 🔥 deixa a UI tratar
     }
   }
 
-  Future<bool> register(String nome, String email, String telefone, String cpf, String senha) async {
+  Future<String?> register(
+      String nome,
+      String email,
+      String senha,
+      String cpf,
+      String telefone,
+      ) async {
     try {
-      final response = await api.post(
+      final data = await ApiClient().post(
         "/auth/register",
         {
           "nome": nome,
           "email": email,
-          "telefone": telefone,
-          "cpf": cpf,
           "senha": senha,
+          "cpf": cpf,
+          "telefone": telefone,
         },
-        auth: false, // Sem token, pois está criando a conta
+        auth: false,
       );
 
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
+      final token = data["data"]?["token"];
 
-        // 🔍 Verifica se a chave 'data' existe e contém o token
-        if (jsonResponse["data"] != null) {
-          final tokenDaApi = jsonResponse["data"]["token"];
-
-          if (tokenDaApi != null) {
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setString("token", tokenDaApi);
-            return true; // Sucesso e logado!
-          }
-        }
+      if (token != null) {
+        await salvarToken(token);
+        return token;
       }
-      print(response);
-      return false; // Falha no cadastro
-    } catch (e) {
-      print("Erro de conexão ao cadastrar: $e");
-      return false;
+
+      throw ApiException("Erro ao registrar", 500);
+
+    } on ApiException {
+      rethrow;
     }
   }
-
 
   static void logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove("token");
 
+  }
+
+  Future<void> salvarToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("token", token);
   }
 
 }

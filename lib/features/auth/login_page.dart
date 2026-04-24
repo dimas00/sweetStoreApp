@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/network/api_exception.dart';
 import '../../core/state/app_state.dart';
 import 'auth_service.dart';
 import '../../core/utils/app_alert.dart';
@@ -21,21 +22,27 @@ class _LoginState extends State<Login> {
   void fazerLogin() async {
     setState(() => isLoading = true);
 
-    final controller = AppState.userController;
+    try {
+      final token = await authService.login(
+        emailController.text,
+        senhaController.text,
+      );
 
-    final sucesso = await controller.login(
-      emailController.text,
-      senhaController.text,
-    );
+      if (token != null) {
+        await AppState.userController.carregarUsuario();
 
-    if (!mounted) return;
+        if (!mounted) return;
+        Navigator.pop(context, true);
+      }
 
-    if (sucesso) {
-      Navigator.pop(context, true); // 🔥 volta pro guard
-    } else {
-      mostrarErro("Login inválido");
+    } on ApiException catch (e) {
+      mostrarErro(e.message); // 🔥 agora funciona
+
+    } catch (e) {
+      mostrarErro("Erro inesperado");
     }
 
+    if (!mounted) return;
     setState(() => isLoading = false);
   }
 

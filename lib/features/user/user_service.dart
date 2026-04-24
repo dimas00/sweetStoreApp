@@ -1,34 +1,30 @@
-import 'dart:convert';
 import '../../core/network/api_client.dart';
+import '../../core/network/api_exception.dart';
 
 class UserService {
 
   final api = ApiClient();
 
-  // 🔍 busca usuário logado
-  // 🔍 busca usuário logado
   Future<Map<String, dynamic>?> getUsuario() async {
     try {
-      final response = await api.get("/usuario/me");
+      final data = await api.get("/usuario/me");
 
-      print("GET USER STATUS: ${response.statusCode}");
-      print("GET USER BODY: ${response.body}");
+      print("GET USER DATA: $data");
 
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
+      return data["data"]; // 🔥 já vem pronto
 
-        // 🔥 Verifica se o campo 'data' existe e o retorna diretamente
-        if (jsonResponse["data"] != null) {
-          return jsonResponse["data"];
-        }
+    } on ApiException catch (e) {
+      print("Erro ao buscar usuário: ${e.message}");
+
+      if (e.statusCode == 401) {
+        return null; // não logado
       }
 
-      // ❗ se não for 200 ou não vier dados → considera não logado
-      return null;
+      rethrow; // 🔥 não esconde erro
 
     } catch (e) {
-      print("Erro ao buscar usuário: $e");
-      return null;
+      print("Erro inesperado: $e");
+      rethrow;
     }
   }
 

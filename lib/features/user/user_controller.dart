@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/network/api_exception.dart';
 import '../auth/auth_service.dart';
 import '../auth/login_page.dart';
 import 'user_service.dart';
@@ -31,16 +32,14 @@ class UserController {
 
   Future<Map<String, dynamic>?> carregarUsuario() async {
     try {
-      final data = await userService.getUsuario();
-
-      // 🔥 salva no estado global
-      usuario = data;
-
+      usuario = await userService.getUsuario();
       return usuario;
-    } catch (e) {
-      // se der erro (token inválido, etc)
-      usuario = null;
-      return null;
+    } on ApiException catch (e) {
+      if (e.statusCode == 401) {
+        usuario = null;
+        return null;
+      }
+      rethrow;
     }
   }
 
@@ -69,15 +68,15 @@ class UserController {
   }
 
   Future<bool> atualizar(String nome, String email) async {
-    final ok = await userService.atualizarUsuario(nome, email);
+    try {
+      await userService.atualizarUsuario(nome, email);
 
-    if (ok) {
-      // atualiza local sem precisar bater na API de novo
-      usuario?["nome"] = nome;
-      usuario?["email"] = email;
+      await carregarUsuario(); // 🔥 mantém sincronizado
+
+      return true;
+    } on ApiException {
+      return false;
     }
-
-    return ok;
   }
 
   void limpar() {

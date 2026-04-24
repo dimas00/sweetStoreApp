@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sweet_store/features/auth/auth_service.dart';
+import '../../core/network/api_exception.dart';
 import '../../core/state/app_state.dart';
 import '../../core/utils/app_alert.dart';
 
@@ -82,36 +83,39 @@ class _RegisterPageState extends State<RegisterPage> {
         await AppState.userController.carregarUsuario();
 
         if (!mounted) return;
-        Navigator.pop(context, true);
-        print(token);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/home',
+              (route) => false,
+        );
+        print("Token: ");
+        print( token);
       }
+
+    } on ApiException catch (e) {
+      AppAlert.showError(context, e.message); // 🔥 ex: "Email já cadastrado"
+
     } catch (e) {
-      AppAlert.showError(context, "Erro ao conectar");
+      AppAlert.showError(context, "Erro inesperado");
     }
 
     if (!mounted) return;
     setState(() => isLoading = false);
   }
 
-  // Função auxiliar para criar os campos seguindo seu padrão de design
   Widget buildTextField({
     required TextEditingController controller,
     required String label,
+    String? errorText, // 🔥 novo
     bool obscureText = false,
-    TextInputType keyboardType = TextInputType.text,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: TextField(
-        controller: controller,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        labelText: label,
+        errorText: errorText, // 🔥 aqui mostra o erro
+        border: OutlineInputBorder(),
       ),
     );
   }
@@ -130,11 +134,34 @@ class _RegisterPageState extends State<RegisterPage> {
           children: [
             const SizedBox(height: 20),
 
-            buildTextField(controller: nomeController, label: 'Nome Completo'),
-            buildTextField(controller: emailController, label: 'E-mail', keyboardType: TextInputType.emailAddress),
-            buildTextField(controller: telefoneController, label: 'Telefone', keyboardType: TextInputType.phone),
-            buildTextField(controller: cpfController, label: 'CPF', keyboardType: TextInputType.number),
-            buildTextField(controller: senhaController, label: 'Senha', obscureText: true,),
+            buildTextField(
+              controller: nomeController,
+              label: 'Nome Completo',
+              errorText: erroNome,
+            ),
+            buildTextField(
+              controller: emailController,
+              label: 'Email',
+              errorText: erroEmail,
+            ),
+
+            buildTextField(
+              controller: telefoneController,
+              label: 'Telefone',
+              errorText: erroTelefone,
+            ),
+            buildTextField(
+              controller: cpfController,
+              label: 'Cpf',
+              errorText: erroCpf,
+            ),
+
+            buildTextField(
+              controller: senhaController,
+              label: 'Senha',
+              errorText: erroSenha,
+              obscureText: true,
+            ),
 
             const SizedBox(height: 10),
 
