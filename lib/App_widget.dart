@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:sweet_store/features/addrees/address_page.dart';
 import 'package:sweet_store/features/auth/register_page.dart';
 import 'package:sweet_store/features/cart/cart_page.dart';
 import 'package:sweet_store/features/home/home_page.dart';
 import 'package:sweet_store/features/auth/session_manager.dart';
 import 'package:sweet_store/features/user/user_page.dart';
 
+import 'features/addrees/address_page.dart';
 import 'features/auth/login_page.dart';
 import 'core/splash_page.dart';
 import 'features/checkout/checkout_page.dart';
@@ -42,8 +42,8 @@ class _AppWidgetState extends State<AppWidget> {
         ),
       ),
       navigatorKey: navigatorKey,
-      routes: {'/login': (_) => Login(), '/home': (_) => Home(), '/cart': (_) => Carrinho(), '/user': (_) => UserPage(), '/checkout': (_) => CheckoutPage(), '/addrees': (_) => AddreesPage(), '/register': (_) => RegisterPage() },
-      home: Home(),
+      routes: {'/login': (_) => Login(), '/home': (_) => Home(), '/cart': (_) => Carrinho(), '/user': (_) => UserPage(), '/checkout': (_) => CheckoutPage(), '/addrees': (_) => AddressPage(), '/register': (_) => RegisterPage() },
+      home: SplashPage(),
     );
   }
 }

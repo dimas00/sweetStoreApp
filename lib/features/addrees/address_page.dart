@@ -1,101 +1,132 @@
 import 'package:flutter/material.dart';
-
 import 'address_service.dart';
+import 'address_form_page.dart'; // Criaremos este arquivo no passo 3
 
-class AddreesPage extends StatefulWidget {
-  const AddreesPage({Key? key}) : super(key: key);
+class AddressPage extends StatefulWidget {
+  const AddressPage({Key? key}) : super(key: key);
 
   @override
-  State<AddreesPage> createState() => _AddreesPageState();
+  State<AddressPage> createState() => _AddressPageState();
 }
 
-class _AddreesPageState extends State<AddreesPage> {
-  Widget buildInput(TextEditingController controller, String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(),
-        ),
-      ),
-    );
-  }
+class _AddressPageState extends State<AddressPage> {
 
-  final nomeController = TextEditingController();
-  final ruaController = TextEditingController();
-  final numeroController = TextEditingController();
-  final bairroController = TextEditingController();
-  final cidadeController = TextEditingController();
-  final cepController = TextEditingController();
-  final complementoController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
 
-  String? erro;
-
-  void salvarEndereco() {
-    final erroValidacao = validarEndereco();
-
-    setState(() {
-      erro = erroValidacao;
+    // Garante que o redirecionamento ocorra logo após a tela carregar
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Verifica se a lista de endereços do serviço está vazia
+      if (AddressService.addresses.value.isEmpty) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AddressFormPage()),
+        ); // Navega para o formulário de cadastro
+      }
     });
-
-    if (erroValidacao != null) return;
-
-    final endereco = {
-      "nome": nomeController.text,
-      "rua": ruaController.text,
-      "numero": numeroController.text,
-      "bairro": bairroController.text,
-      "cidade": cidadeController.text,
-      "cep": cepController.text,
-      "complemento": complementoController.text,
-    };
-
-    AddressService.setAddress(endereco);
-
-    Navigator.pop(context, true);
-
-  }
-
-  String? validarEndereco() {
-    if (nomeController.text.isEmpty) return "Informe o nome do endereço";
-    if (ruaController.text.isEmpty) return "Informe a rua";
-    if (numeroController.text.isEmpty) return "Informe o número";
-    if (bairroController.text.isEmpty) return "Informe o bairro";
-    if (cidadeController.text.isEmpty) return "Informe a cidade";
-    if (cepController.text.isEmpty) return "Informe o CEP";
-
-    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Cadastrar Endereço")),
+      appBar: AppBar(
+        title: const Text("Meus Endereços"),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
+      ),
       body: Column(
         children: [
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.all(16),
-              children: [
-                buildInput(nomeController, "Nome do endereço"),
-                buildInput(ruaController, "Rua"),
-                buildInput(numeroController, "Número"),
-                buildInput(bairroController, "Bairro"),
-                buildInput(cidadeController, "Cidade"),
-                buildInput(cepController, "CEP"),
-                buildInput(complementoController, "Complemento (opcional)"),
-
-                if (erro != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Text(erro!, style: TextStyle(color: Colors.red)),
-                  ),
-              ],
+          // 🔵 BOTÃO DE CADASTRAR
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.add),
+                label: const Text("Cadastrar Novo Endereço"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AddressFormPage()),
+                  );
+                },
+              ),
             ),
           ),
 
+          // 🔵 LISTA DE ENDEREÇOS
+          Expanded(
+            child: ValueListenableBuilder<List<Map<String, dynamic>>>(
+              valueListenable: AddressService.addresses,
+              builder: (context, lista, child) {
+                if (lista.isEmpty) {
+                  return const Center(
+                    child: Text("Nenhum endereço cadastrado.", style: TextStyle(fontSize: 16)),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: lista.length,
+                  itemBuilder: (context, index) {
+                    final endereco = lista[index];
+                    final isPadrao = endereco['padrao'] == true;
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      elevation: 2,
+                      child: ListTile(
+                        title: Row(
+                          children: [
+                            Text(endereco['nome'] ?? 'Endereço', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            if (isPadrao) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Text("Padrão", style: TextStyle(color: Colors.white, fontSize: 10)),
+                              ),
+                            ]
+                          ],
+                        ),
+                        subtitle: Text("${endereco['rua']}, ${endereco['numero']}\n${endereco['bairro']} - ${endereco['cidade']}"),
+                        isThreeLine: true,
+                        // 🔵 MENU DE OPÇÕES (Editar, Excluir, Padrão)
+                        trailing: PopupMenuButton<String>(
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => AddressFormPage(enderecoParaEditar: endereco)),
+                              );
+                            } else if (value == 'delete') {
+                              AddressService.removeAddress(endereco['id']);
+                            } else if (value == 'default') {
+                              AddressService.setAsDefault(endereco['id']);
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(value: 'edit', child: Text("Editar")),
+                            const PopupMenuItem(value: 'delete', child: Text("Excluir", style: TextStyle(color: Colors.red))),
+                            if (!isPadrao)
+                              const PopupMenuItem(value: 'default', child: Text("Tornar Padrão")),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

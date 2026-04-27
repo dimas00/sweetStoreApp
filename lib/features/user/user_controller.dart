@@ -39,7 +39,15 @@ class UserController {
         usuario = null;
         return null;
       }
-      rethrow;
+      // Outros erros da API (403, 500, etc)
+      print("Erro da API ao carregar usuário: ${e.message}");
+      usuario = null;
+      return null;
+    } catch (e) {
+      // 🔥 Erros de internet, servidor fora do ar, etc.
+      print("Erro de conexão ao carregar usuário: $e");
+      usuario = null;
+      return null;
     }
   }
 

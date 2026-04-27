@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:sweet_store/core/utils/app_alert.dart';
 
 import '../../shered/widgets/buildFooter.dart';
-import '../addrees/address_page.dart';
 import '../addrees/address_service.dart';
+import '../addrees/address_page.dart';
+
 import '../cart/cart_service.dart';
 
 class CheckoutPage extends StatefulWidget {
@@ -206,42 +207,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   Widget buildEndereco() {
     return ValueListenableBuilder(
-      valueListenable: AddressService.address,
+      valueListenable: AddressService.addresses,
       builder: (context, address, child) {
-
-        if (address == null) {
-          return Column(
-            children: [
-              Text("Nenhum endereço cadastrado"),
-              TextButton(
-                onPressed: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AddreesPage(),
-                    ),
-                  );
-                },
-                child: Text("Cadastrar endereço"),
-              ),
-            ],
-          );
-        }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("${address["rua"]}, ${address["numero"]}"),
-            Text("${address["bairro"]} - ${address["cidade"]}"),
+           // Text("${address["rua"]}, ${address["numero"]}"),
+            //Text("${address["bairro"]} - ${address["cidade"]}"),
 
             TextButton(
               onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AddreesPage(),
-                  ),
-                );
+                await Navigator.pushNamed(context, '/ddress');
               },
               child: Text("Alterar endereço"),
             ),

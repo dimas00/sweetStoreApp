@@ -174,12 +174,6 @@ class _UserPageState extends State<UserPage> {
             Column(
               children: [
                 Text("Nenhum endereço cadastrado"),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/addrees');
-                  },
-                  child: Text("Cadastrar endereço"),
-                ),
               ],
             ),
 
@@ -225,7 +219,7 @@ class _UserPageState extends State<UserPage> {
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () {
-                // novo endereço
+                Navigator.pushNamed(context, '/addrees');
               },
               icon: Icon(Icons.add),
               label: Text("Novo endereço"),

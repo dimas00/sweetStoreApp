@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../features/auth/auth_service.dart';
-import '../features/auth/login_page.dart';
+// import '../features/auth/login_page.dart'; // Não é mais necessário aqui
 import '../shered/constants/app_colors.dart';
 import 'state/app_state.dart';
 
@@ -13,30 +13,37 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  final controller = AppState.userController;
+
   @override
   void initState() {
-    // TODO: implement initState
-    super.initState();
-    super.initState();
+    super.initState(); // Removi a duplicata que tinha aqui
     iniciarApp();
   }
 
-  final controller = AppState.userController;
-
-
   void iniciarApp() async {
-    final user = await controller.carregarUsuario();
+    try {
+      // Tenta carregar o usuário
+      final user = await controller.carregarUsuario();
 
-    if (!mounted) return;
+      print("Splash - Usuário carregado: $user");
 
-    // 🔥 se não conseguiu carregar → token inválido
-    if (user == null) {
-      AuthService.logout(); // limpa token do storage
-      controller.limpar(); // limpa estado global
+      if (user == null) {
+        // 🔥 se retornou null, token inválido ou não existe
+        AuthService.logout();
+        controller.limpar();
+      }
+    } catch (e) {
+      // ⚠️ Se cair aqui, a API tá fora do ar ou sem internet
+      print("Erro grave ao iniciar app: $e");
+      AuthService.logout();
+      controller.limpar();
+    } finally {
+      // ✅ FINALLY: Executa independentemente de dar erro ou sucesso!
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
     }
-
-    // segue normal (sem obrigar login)
-    Navigator.pushReplacementNamed(context, '/home');
   }
 
   @override
@@ -44,14 +51,14 @@ class _SplashPageState extends State<SplashPage> {
     return Scaffold(
       body: Container(
         alignment: Alignment.center,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomLeft,
             colors: [AppColors.purpleone, AppColors.purpletwo],
           ),
         ),
-        child: Container(child: CircularProgressIndicator(color: Colors.white)),
+        child: const CircularProgressIndicator(color: Colors.white),
       ),
     );
   }

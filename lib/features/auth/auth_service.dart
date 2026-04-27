@@ -26,8 +26,8 @@ class AuthService {
         auth: false, // 🔥 login não usa token
       );
 
-      final token = data["data"]?["token"];
-
+      final token = data["data"]["token"];
+      print("TOKEN RECEBIDO: $token");
       if (token != null) {
         await salvarToken(token);
         return token;
@@ -61,9 +61,11 @@ class AuthService {
       );
 
       final token = data["data"]?["token"];
+      print("token recebido:  $token");
 
       if (token != null) {
         await salvarToken(token);
+        AuthService.token = token;
         return token;
       }
 
@@ -83,6 +85,7 @@ class AuthService {
   Future<void> salvarToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString("token", token);
+    print("token salvo: $token");
   }
 
 }

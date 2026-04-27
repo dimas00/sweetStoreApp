@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../core/network/api_client.dart';
 import '../../core/network/api_exception.dart';
 
@@ -6,6 +8,14 @@ class UserService {
   final api = ApiClient();
 
   Future<Map<String, dynamic>?> getUsuario() async {
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null || token.isEmpty) {
+      print("Nenhum token encontrado. Pulando requisição /usuario/me.");
+      return null;
+    }
     try {
       final data = await api.get("/usuario/me");
 
