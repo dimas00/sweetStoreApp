@@ -81,6 +81,7 @@ class ApiClient {
 
     // 🔐 401 → logout
     if (statusCode == 401) {
+
       print("TOKEN EXPIRADO → LOGOUT AUTOMÁTICO");
 
       SessionManager.logout();

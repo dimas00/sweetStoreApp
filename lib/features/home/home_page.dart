@@ -53,8 +53,7 @@ class _HomeState extends State<Home> {
         print("SETANDO LISTA: ${products.length}");
         isLoading = false;
       });
-      print(products);
-      print(products.length);
+
     } catch (e) {
       setState(() {
         isLoading = false;

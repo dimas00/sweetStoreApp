@@ -7,7 +7,8 @@ class UserService {
 
   final api = ApiClient();
 
-  Future<Map<String, dynamic>?> getUsuario() async {
+  Future<Map<String, dynamic>?>
+  getUsuario() async {
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -18,13 +19,14 @@ class UserService {
     }
     try {
       final data = await api.get("/usuario/me");
+      print("fazendo a requisição");
 
       print("GET USER DATA: $data");
 
       return data["data"]; // 🔥 já vem pronto
 
     } on ApiException catch (e) {
-      print("Erro ao buscar usuário: ${e.message}");
+      print("🔥 ApiException: ${e.message} (${e.statusCode})");
 
       if (e.statusCode == 401) {
         return null; // não logado
@@ -32,7 +34,8 @@ class UserService {
 
       rethrow; // 🔥 não esconde erro
 
-    } catch (e) {
+    } catch (e, stack) {
+      print("Stack: $stack");
       print("Erro inesperado: $e");
       rethrow;
     }

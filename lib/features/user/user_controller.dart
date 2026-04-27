@@ -35,7 +35,7 @@ class UserController {
       usuario = await userService.getUsuario();
       return usuario;
     } on ApiException catch (e) {
-      if (e.statusCode == 401) {
+      if (e.statusCode == 401 || e.statusCode == 403) {
         usuario = null;
         return null;
       }

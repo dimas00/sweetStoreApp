@@ -19,25 +19,32 @@ class AddressService {
 
         // Converte a lista dinâmica para o formato esperado e atualiza o ValueNotifier
         addresses.value = listaBruta.cast<Map<String, dynamic>>();
+        print("Endereços carregados: ${addresses.value}");
       }
     } catch (e) {
       print("Erro ao carregar endereços: $e");
     }
   }
 
-  static void addAddress(Map<String, dynamic> newAddress) {
-    // Se for o primeiro endereço, já define como padrão automaticamente
-    if (addresses.value.isEmpty) {
-      newAddress['padrao'] = true;
-    } else if (newAddress['padrao'] == true) {
-      _removerPadraoAtual();
+  // address_service.dart
+
+  static Future<bool> save(Map<String, dynamic> dados) async {
+    try {
+      // 🚀 Envia os dados para o endpoint /endereco
+      final response = await api.post("/endereco", dados);
+
+      // Se o ApiClient não lançou exceção, a operação foi um sucesso
+      // O backend retorna o objeto criado dentro da chave "data"
+      if (response != null && response["data"] != null) {
+        // Opcional: Recarregar a lista local após salvar
+        await fetchAddresses();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("Erro ao salvar endereço na API: $e");
+      return false;
     }
-
-    // Geramos um ID falso localmente para conseguir editar/excluir (no futuro virá do backend)
-    newAddress['id'] = DateTime.now().millisecondsSinceEpoch.toString();
-
-    // Atualiza a lista
-    addresses.value = [...addresses.value, newAddress];
   }
 
   static void updateAddress(String id, Map<String, dynamic> updatedAddress) {

@@ -22,6 +22,8 @@ class _AddressFormPageState extends State<AddressFormPage> {
   bool isPadrao = false;
   String? erro;
 
+  bool isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -39,30 +41,36 @@ class _AddressFormPageState extends State<AddressFormPage> {
     }
   }
 
-  void salvarEndereco() {
+  void salvarEndereco() async {
     final erroValidacao = validarEndereco();
     setState(() => erro = erroValidacao);
     if (erroValidacao != null) return;
 
-    final endereco = {
-      "nome": nomeController.text,
+    setState(() => isLoading = true); // Adicione um estado de carregamento
+
+    // 📦 Monte o objeto exatamente como o Endereco.java espera
+    final dados = {
+      "nomeEndereco": nomeController.text, // Nome correto conforme o Java
       "rua": ruaController.text,
       "numero": numeroController.text,
       "bairro": bairroController.text,
       "cidade": cidadeController.text,
+      "estado": "RS", // Você pode adicionar um campo para o estado depois
       "cep": cepController.text,
       "complemento": complementoController.text,
       "padrao": isPadrao,
     };
 
-    if (widget.enderecoParaEditar == null) {
-      AddressService.addAddress(endereco); // CRIAR NOVO
-    } else {
-      endereco['id'] = widget.enderecoParaEditar!['id']; // Mantém o ID
-      AddressService.updateAddress('endereco[', endereco); // EDITAR EXISTENTE
-    }
+    final sucesso = await AddressService.save(dados);
 
-    Navigator.pop(context, true);
+    if (!mounted) return;
+    setState(() => isLoading = false);
+
+    if (sucesso) {
+      Navigator.pop(context, true);
+    } else {
+      setState(() => erro = "Erro ao salvar no servidor. Tente novamente.");
+    }
   }
 
   String? validarEndereco() {
