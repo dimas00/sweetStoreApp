@@ -14,7 +14,7 @@ class _AddressPageState extends State<AddressPage> {
   @override
   void initState() {
     super.initState();
-
+    AddressService.fetchAddresses();
     // Garante que o redirecionamento ocorra logo após a tela carregar
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Verifica se a lista de endereços do serviço está vazia

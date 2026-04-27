@@ -1,8 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:sweet_store/core/network/api_client.dart';
 
 class AddressService {
+
+  static final api = ApiClient();
   // 🔥 Agora guarda uma LISTA de endereços
   static final ValueNotifier<List<Map<String, dynamic>>> addresses = ValueNotifier([]);
+
+  static Future<void> fetchAddresses() async {
+    try {
+      // Faz a requisição GET para o endpoint de endereços
+      final response = await api.get("/endereco");
+
+      // O seu ApiClient já trata erros e retorna o body decodificado
+      // A estrutura do seu Java coloca os dados na chave "data"
+      if (response != null && response["data"] != null) {
+        final List<dynamic> listaBruta = response["data"];
+
+        // Converte a lista dinâmica para o formato esperado e atualiza o ValueNotifier
+        addresses.value = listaBruta.cast<Map<String, dynamic>>();
+      }
+    } catch (e) {
+      print("Erro ao carregar endereços: $e");
+    }
+  }
 
   static void addAddress(Map<String, dynamic> newAddress) {
     // Se for o primeiro endereço, já define como padrão automaticamente
