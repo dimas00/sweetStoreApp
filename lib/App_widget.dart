@@ -10,6 +10,9 @@ import 'features/auth/login_page.dart';
 import 'core/splash_page.dart';
 import 'features/checkout/checkout_page.dart';
 
+// 🔥 1. Importe o main.dart para ter acesso à navigatorKey global
+import '../main.dart';
+
 class AppWidget extends StatefulWidget {
   const AppWidget({super.key});
 
@@ -18,16 +21,15 @@ class AppWidget extends StatefulWidget {
 }
 
 class _AppWidgetState extends State<AppWidget> {
-  final navigatorKey = GlobalKey<NavigatorState>();
-
   @override
   void initState() {
     super.initState();
 
     SessionManager.onLogout = () {
+      // Como importamos o main.dart, ele já enxerga a chave global aqui
       navigatorKey.currentState?.pushNamedAndRemoveUntil(
         '/login',
-        (route) => false,
+            (route) => false,
       );
     };
   }
@@ -35,15 +37,23 @@ class _AppWidgetState extends State<AppWidget> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       theme: ThemeData(
-        appBarTheme: AppBarTheme(
+        appBarTheme: const AppBarTheme(
           backgroundColor: Colors.deepPurple,
           foregroundColor: Colors.white,
         ),
       ),
-      navigatorKey: navigatorKey,
-      routes: {'/login': (_) => Login(), '/home': (_) => Home(), '/cart': (_) => Carrinho(), '/user': (_) => UserPage(), '/checkout': (_) => CheckoutPage(), '/addrees': (_) => AddressPage(), '/register': (_) => RegisterPage() },
-      home: SplashPage(),
+      routes: {
+        '/login': (_) => const Login(),
+        '/home': (_) => const Home(),
+        '/cart': (_) => const Carrinho(),
+        '/user': (_) => const UserPage(),
+        '/checkout': (_) => const CheckoutPage(),
+        '/addrees': (_) => const AddressPage(),
+        '/register': (_) => const RegisterPage()
+      },
+      home: const SplashPage(),
     );
   }
 }

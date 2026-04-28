@@ -42,11 +42,15 @@ class _AddressFormPageState extends State<AddressFormPage> {
   }
 
   void salvarEndereco() async {
+
+
+
     final erroValidacao = validarEndereco();
     setState(() => erro = erroValidacao);
     if (erroValidacao != null) return;
 
     setState(() => isLoading = true); // Adicione um estado de carregamento
+
 
     // 📦 Monte o objeto exatamente como o Endereco.java espera
     final dados = {
@@ -60,6 +64,17 @@ class _AddressFormPageState extends State<AddressFormPage> {
       "complemento": complementoController.text,
       "padrao": isPadrao,
     };
+
+    if (widget.enderecoParaEditar == null) {
+      // ➕ CRIAR NOVO
+      final sucesso = await AddressService.save(dados);
+      if (sucesso) Navigator.pop(context, true);
+    } else {
+      // ✏️ EDITAR EXISTENTE
+      final id = widget.enderecoParaEditar!['id'];
+      final sucesso = await AddressService.update(id, dados);
+      if (sucesso) Navigator.pop(context, true);
+    }
 
     final sucesso = await AddressService.save(dados);
 

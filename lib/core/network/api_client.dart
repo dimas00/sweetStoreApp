@@ -1,10 +1,15 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/auth/auth_service.dart';
 import '../../features/auth/session_manager.dart';
+import '../../main.dart';
 import '../config/api_config.dart';
 import '../network/api_exception.dart';
+import '../state/app_state.dart';
+import '../utils/app_alert.dart';
 
 
 class ApiClient {
@@ -66,12 +71,25 @@ class ApiClient {
   }
 
   // ========================
+  // DELETE
+  // ========================
+  Future<dynamic> delete(String endpoint) async {
+    final headers = await _getHeaders();
+
+    final response = await http.delete(
+      Uri.parse("${ApiConfig.baseUrl}$endpoint"),
+      headers: headers,
+    );
+
+    return _handleResponse(response);
+  }
+
+  // ========================
   // CENTRALIZA TUDO AQUI
   // ========================
   dynamic _handleResponse(http.Response response) {
     final statusCode = response.statusCode;
 
-    // tenta ler body
     dynamic body;
     try {
       body = jsonDecode(response.body);
@@ -79,25 +97,31 @@ class ApiClient {
       body = null;
     }
 
-    // 🔐 401 → logout
-    if (statusCode == 401) {
+    // 🚨 401 (Não Autorizado) ou 403 (Proibido) → TOKEN EXPIRADO
+    if (statusCode == 401 || statusCode == 403) {
+      print("TOKEN EXPIRADO → KICK GLOBAL");
 
-      print("TOKEN EXPIRADO → LOGOUT AUTOMÁTICO");
+      // 1. Limpa os dados de sessão
+      AuthService.logout();
+      AppState.userController.limpar();
 
-      SessionManager.logout();
+      // 2. Pega o contexto da tela atual através da chave global
+      final context = navigatorKey.currentContext;
 
-      throw ApiException(
-        body?["message"] ?? "Sessão expirada",
-        statusCode,
-      );
+      if (context != null) {
+        // 3. Avisa o usuário!
+        AppAlert.showError(context, "Sua sessão expirou. Por favor, faça login novamente.");
+
+        // 4. Redireciona para o login apagando o histórico (pra não ter como voltar)
+        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+      }
+
+      throw ApiException(body?["message"] ?? "Sessão expirada", statusCode);
     }
 
-    // ❌ erros gerais (400, 403, 409, 500...)
+    // ❌ Outros erros (400, 404, 500)
     if (statusCode >= 400) {
-      throw ApiException(
-        body?["message"] ?? "Erro inesperado",
-        statusCode,
-      );
+      throw ApiException(body?["message"] ?? "Erro inesperado", statusCode);
     }
 
     // ✅ sucesso

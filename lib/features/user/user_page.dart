@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:sweet_store/core/utils/app_alert.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/state/app_state.dart';
+import '../addrees/address_page.dart';
+import '../addrees/address_service.dart';
 import '../auth/auth_service.dart';
 import 'edit_user_page.dart';
 
@@ -30,7 +32,7 @@ class _UserPageState extends State<UserPage> {
   @override
   void initState() {
     super.initState();
-
+    AddressService.fetchAddresses();
     carregar();
   }
 
@@ -152,7 +154,6 @@ class _UserPageState extends State<UserPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Aqui você pode usar Text ou ListTiles em vez de TextFields para visualização
           Text("Nome: ${nomeController.text}", style: const TextStyle(fontSize: 15)),
           const SizedBox(height: 5),
           Text("Email: ${emailController.text}", style: const TextStyle(fontSize: 15)),
@@ -163,70 +164,74 @@ class _UserPageState extends State<UserPage> {
     );
   }
 
-  Widget buildEnderecos() {
-    final enderecos = controller.usuario?["enderecos"] ?? [];
+// Dentro da sua UserPage.dart
 
-    return buildSection(
-      title: "Endereços",
-      child: Column(
-        children: [
-          if (enderecos.isEmpty)
-            Column(
-              children: [
-                Text("Nenhum endereço cadastrado"),
-              ],
-            ),
+  Widget buildEndereco(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Meu Endereço",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        const SizedBox(height: 10),
 
-          ...enderecos.map<Widget>((e) {
-            return Container(
-              margin: EdgeInsets.only(bottom: 10),
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("${e["rua"]}, ${e["numero"]}"),
-                  Text("${e["bairro"]} - ${e["cidade"]}"),
+        // Escuta as mudanças nos endereços em tempo real
+        ValueListenableBuilder<List<Map<String, dynamic>>>(
+          valueListenable: AddressService.addresses,
+          builder: (context, lista, child) {
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+            // 🔍 Busca o endereço padrão. Se não tiver nenhum padrão definido, pega o primeiro. Se a lista for vazia, retorna null.
+            final enderecoPadrao = lista.isNotEmpty
+                ? lista.firstWhere((e) => e['padrao'] == true, orElse: () => lista.first)
+                : null;
+
+            return InkWell( // Deixa o card clicável com efeitinho de ondinha
+              onTap: () {
+                // 🚀 Vai para o Gerenciador de Endereços
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AddressPage()),
+                );
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
                     children: [
-                      IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          // editar endereço
-                        },
+                      const Icon(Icons.location_on, color: Colors.deepPurple, size: 30),
+                      const SizedBox(width: 15),
+                      Expanded(
+                        child: enderecoPadrao != null
+                            ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              enderecoPadrao['nomeEndereco'] ?? 'Endereço Principal',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            const SizedBox(height: 4),
+                            Text("${enderecoPadrao['rua']}, ${enderecoPadrao['numero']}"),
+                            Text("${enderecoPadrao['bairro']} - ${enderecoPadrao['cidade']}"),
+                          ],
+                        )
+                            : const Text(
+                          "Nenhum endereço cadastrado.\nClique aqui para adicionar.",
+                          style: TextStyle(color: Colors.grey),
+                        ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () {
-                          // deletar endereço
-                        },
-                      ),
+                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
                     ],
                   ),
-                ],
+                ),
               ),
             );
-          }).toList(),
-
-          SizedBox(height: 10),
-
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                Navigator.pushNamed(context, '/addrees');
-              },
-              icon: Icon(Icons.add),
-              label: Text("Novo endereço"),
-            ),
-          ),
-        ],
-      ),
+          },
+        ),
+      ],
     );
   }
 
@@ -244,7 +249,7 @@ class _UserPageState extends State<UserPage> {
       ),
       body: ListView(
         padding: EdgeInsets.all(16),
-        children: [buildUsuario(), buildEnderecos()],
+        children: [buildUsuario(), buildEndereco(context)],
       ),
     );
   }

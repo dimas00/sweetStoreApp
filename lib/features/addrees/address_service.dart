@@ -47,35 +47,54 @@ class AddressService {
     }
   }
 
-  static void updateAddress(String id, Map<String, dynamic> updatedAddress) {
-    if (updatedAddress['padrao'] == true) {
-      _removerPadraoAtual();
+  // address_service.dart
+
+  // ✏️ EDITAR (PUT)
+  static Future<bool> update(int id, Map<String, dynamic> dados) async {
+    try {
+      final response = await api.put("/endereco/$id", dados);
+      if (response != null) {
+        await fetchAddresses(); // 🔄 Atualiza a lista local com os dados novos
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("Erro ao atualizar endereço: $e");
+      return false;
     }
-
-    final newList = addresses.value.map((e) {
-      if (e['id'] == id) return updatedAddress;
-      return e;
-    }).toList();
-
-    addresses.value = newList;
   }
 
-  static void removeAddress(String id) {
-    addresses.value = addresses.value.where((e) => e['id'] != id).toList();
+  // 🗑️ EXCLUIR (DELETE)
+  static Future<bool> delete(int id) async {
+    try {
+      // Nota: Adicione o método delete() no seu ApiClient se ele ainda não existir
+      final response = await api.delete("/endereco/$id");
+
+      await fetchAddresses(); // 🔄 Remove o item da lista local
+      return true;
+    } catch (e) {
+      print("Erro ao excluir endereço: $e");
+      return false;
+    }
   }
 
-  static void setAsDefault(String id) {
-    final newList = addresses.value.map((e) {
-      return {...e, 'padrao': e['id'] == id}; // Só fica true se for o id escolhido
-    }).toList();
+// 🌟 DEFINIR COMO PADRÃO
+  static Future<bool> setAsDefault(int idEndereco) async {
+    try {
+      // Faz o PUT para o endpoint que você mapeou no EnderecoController
+      final response = await api.put("/endereco/padrao/$idEndereco", {});
 
-    addresses.value = newList;
+      if (response != null) {
+        await fetchAddresses(); // 🔄 Atualiza a lista na tela imediatamente
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("Erro ao definir endereço como padrão: $e");
+      return false;
+    }
   }
 
-  static void _removerPadraoAtual() {
-    // Tira o "padrao = true" do endereço que estava marcado
-    addresses.value = addresses.value.map((e) => {...e, 'padrao': false}).toList();
-  }
 
 
   static bool hasAddress() {
